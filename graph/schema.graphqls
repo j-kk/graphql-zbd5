@@ -1,0 +1,40 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+enum Gender {
+  M
+  F
+  OTHER
+}
+
+type Position {
+  width: Float!
+  heigth: Float!
+}
+
+type User {
+  id: ID!
+  gender: Gender
+  birth_year: Int
+  income: Int
+  geo_pos: Position
+  interests: [String!]
+}
+
+input NewPosition {
+  width: Float!
+  heigth: Float!
+}
+
+input NewUser {
+  gender: String
+  birth_year: Int
+  income: Int
+  geo_pos: NewPosition
+  interests: [String!]
+}
+
+type Mutation {
+  createUser(input: NewUser!): User!
+}
