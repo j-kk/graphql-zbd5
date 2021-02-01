@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/j-kk/go-graphql/graph/model"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v4"
+	pgxpool "github.com/jackc/pgx/v4/pgxpool"
 )
 
 type DB struct {
@@ -24,6 +25,29 @@ func InitDB(dtbUrl string) (db *DB, err error) {
 
 func (db *DB) CloseDB() {
 	db.pool.Close()
+}
+
+func retrieveId(tx *pgx.Tx, tableName string) (id int, err error) {
+
+	rows, err := (*tx).Query(context.Background(), "SELECT * FROM currval($1)", tableName)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	for i := 0; rows.Next(); i++ {
+		if i > 0 {
+			return 0, fmt.Errorf("too many results (currval)")
+		}
+		err = rows.Scan(&id)
+		if err != nil {
+			return 0, err
+		}
+	}
+	if rows.Err() != nil {
+		return 0, rows.Err()
+	}
+	return
 }
 
 func (db *DB) addInterests(interests []string) (err error) { // TODO bulk insert
@@ -92,28 +116,13 @@ func (db *DB) AddUser(user *model.User) (err error) {
 			return err
 		}
 	}
-	rows, err := tx.Query(context.Background(), "SELECT * FROM currval('users_id_seq')")
+
+	err = tx.Commit(context.Background())
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 
-	var userId int
-
-	for i := 0; rows.Next(); i++ {
-		if i > 0 {
-			return fmt.Errorf("too many results (currval)")
-		}
-		err = rows.Scan(&userId)
-		if err != nil {
-			return err
-		}
-	}
-	if rows.Err() != nil {
-		return rows.Err()
-	}
-
-	err = tx.Commit(context.Background())
+	userId, err := retrieveId(&tx, "users_id_seq")
 	if err != nil {
 		return err
 	}
