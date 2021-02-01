@@ -1,0 +1,47 @@
+type AdDimensions {
+  width: Int!
+  height: Int!
+}
+
+type Ad {
+  id: Int!
+  dimensions: AdDimensions
+  texts: [String!]
+  mainColor: String
+}
+enum Gender {
+  M
+  F
+  OTHER
+}
+
+type Position {
+  id: Int!
+  width: Float!
+  heigth: Float!
+}
+
+type User {
+  id: Int!
+  gender: Gender
+  birth_year: Int
+  income: Int
+  geo_pos: Position
+  interests: [String!]
+}
+
+type View {
+  id: Int!
+  ad: Ad
+  user: User
+  timestamp: String!
+}
+
+input NewView {
+  adID: Int!
+  userID: Int!
+}
+
+type Mutation {
+  registerView(input: NewView!): View!
+}

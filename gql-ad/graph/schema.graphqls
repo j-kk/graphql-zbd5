@@ -9,18 +9,3 @@ type Ad {
   texts: [String!]
   mainColor: String
 }
-
-input NewAdDimensions {
-  width: Int!
-  height: Int!
-}
-
-input NewAd {
-  dimensions: NewAdDimensions
-  texts: [String!]
-  mainColor: String
-}
-
-type Mutation {
-  registerAd(input: NewAd!): Ad!
-}
